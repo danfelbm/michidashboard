@@ -1,36 +1,92 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Dashboard de Evidencias — Pacto Histórico
 
-## Getting Started
+Portal en **Next.js** para explorar las **evidencias de formularios E‑14** que llegan a la API de michi durante el conteo electoral, con **filtros geográficos completos** (departamento → municipio → zona → puesto → mesa) y un **panel de estadísticas/conteo** de votos.
 
-First, run the development server:
+## Stack
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+- **Next.js 16** (App Router) + **React 19** + **TypeScript**
+- **Tailwind CSS 4** + **shadcn/ui** (Base UI)
+- **TanStack Query** para data fetching / cache
+- Diseño **mobile-first**
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Configuración
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1. Instala dependencias:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+   ```bash
+   npm install
+   ```
 
-## Learn More
+2. Crea `.env.local` a partir de `.env.example` y coloca el token de la API
+   (el token vive **solo en el servidor**; nunca se expone al navegador):
 
-To learn more about Next.js, take a look at the following resources:
+   ```bash
+   cp .env.example .env.local
+   # edita .env.local y completa MICHI_API_TOKEN
+   ```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+   ```
+   MICHI_API_TOKEN=xxx|xxxxxxxx
+   MICHI_API_BASE=https://michi.movimientopactohistorico.co/api/v1
+   ```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+3. (Opcional) Regenera el catálogo geográfico recorriendo la API. Ya viene uno
+   commiteado en `src/data/geo-catalogo.json`, pero puedes refrescarlo:
 
-## Deploy on Vercel
+   ```bash
+   npm run harvest:geo
+   ```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+4. Desarrollo:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+   ```bash
+   npm run dev
+   ```
+
+   Producción:
+
+   ```bash
+   npm run build && npm run start
+   ```
+
+## Arquitectura
+
+### Seguridad del token (proxy server-side)
+
+El navegador **solo** llama a rutas de mismo origen bajo `/api/evidencias/*`.
+Cada Route Handler ([src/app/api/evidencias/](src/app/api/evidencias/)) inyecta
+el header `Authorization: Bearer <token>` y reenvía la petición a la API de michi.
+El token nunca llega al cliente.
+
+| Ruta | Función |
+|------|---------|
+| `GET /api/evidencias` | Lista paginada con filtros |
+| `GET /api/evidencias/[id]` | Detalle de una evidencia |
+| `GET /api/evidencias/[id]/pdf` | Redirige al PDF firmado (`pdf_url`) |
+| `GET /api/evidencias/stats` | Agrega votos recorriendo páginas |
+
+### Filtros disponibles (API)
+
+- **Geográfico** (`divipol`, slug parcial): 2 díg = departamento, 5 = municipio,
+  7 = zona, 10 = puesto, 14 = mesa. La cascada de selects construye el slug
+  ([src/lib/divipol.ts](src/lib/divipol.ts)).
+- `estado` (pendiente / aprobada / rechazada), `origen` (testigo / público)
+- `desde` / `hasta` (rango de fechas)
+- `proceso_electoral_id`, `formato_id`, `cargo_id` (derivados dinámicamente)
+
+> La API limita `per_page` a **100** y no expone catálogo geográfico, por eso
+> los departamentos/municipios se obtienen con `npm run harvest:geo`.
+
+### Estadísticas
+
+El panel ([/estadisticas](src/app/estadisticas/page.tsx)) suma votos por
+candidato sobre el universo filtrado. Para evitar timeouts, recorre hasta
+**60 páginas** (6.000 evidencias) por consulta y marca el resultado como
+*parcial* cuando hay más. **Filtra por municipio** para conteos completos.
+
+### Estado en la URL
+
+Todos los filtros viven en los query params de la URL, así cada vista es
+compartible y sobrevive a recargas ([src/hooks/use-filtros-url.ts](src/hooks/use-filtros-url.ts)).
+El botón **Recargar** del header invalida las queries para traer datos frescos
+(los datos crecen en vivo durante el conteo).

@@ -1,18 +1,18 @@
 import { Suspense } from "react";
-import { Explorador } from "@/components/explorador";
+import { StatsView } from "@/components/stats-view";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function Page() {
   return (
     <div className="space-y-5">
       <div>
-        <h1 className="text-xl font-semibold">Explorador de evidencias</h1>
+        <h1 className="text-xl font-semibold">Estadísticas de conteo</h1>
         <p className="text-sm text-muted-foreground">
-          Filtra los formularios E-14 por geografía, estado, origen y fechas.
+          Suma de votos por candidato sobre el universo filtrado.
         </p>
       </div>
       <Suspense fallback={<Skeleton className="h-96 w-full" />}>
-        <Explorador />
+        <StatsView />
       </Suspense>
     </div>
   );
