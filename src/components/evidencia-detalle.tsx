@@ -129,20 +129,18 @@ export function EvidenciaDetalle({
                     </div>
                     {verPdf && (
                       <object
-                        data={e.pdf_url}
+                        data={`/api/evidencias/${e.id}/pdf`}
                         type="application/pdf"
                         className="h-[60vh] w-full rounded-lg border bg-muted"
                       >
                         <div className="flex flex-col items-center gap-2 p-6 text-center text-sm text-muted-foreground">
-                          <p>
-                            Tu navegador no puede mostrar el PDF aquí.
-                          </p>
+                          <p>Tu navegador no puede mostrar el PDF aquí.</p>
                           <Button
                             variant="outline"
                             size="sm"
                             render={
                               <a
-                                href={e.pdf_url}
+                                href={`/api/evidencias/${e.id}/pdf`}
                                 target="_blank"
                                 rel="noopener noreferrer"
                               />
@@ -172,7 +170,7 @@ export function EvidenciaDetalle({
                 className="w-full"
                 render={
                   <a
-                    href={`/api/evidencias/${e.id}/pdf`}
+                    href={`/api/evidencias/${e.id}/pdf?download=1`}
                     target="_blank"
                     rel="noopener noreferrer"
                   />
