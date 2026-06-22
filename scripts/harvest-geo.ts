@@ -88,14 +88,14 @@ async function main() {
       const g = e.geografia ?? {};
       const dep = g.departamento;
       const mun = g.municipio;
-      if (dep?.codigo) departamentos.set(dep.codigo, dep.nombre);
+      if (dep?.codigo) departamentos.set(dep.codigo, dep.nombre ?? "");
       if (mun?.codigo && dep?.codigo) {
         const key = `${dep.codigo}-${mun.codigo}`;
         if (!municipios.has(key)) {
           municipios.set(key, {
             depto_codigo: dep.codigo,
             codigo: mun.codigo,
-            nombre: mun.nombre,
+            nombre: mun.nombre ?? "",
           });
         }
       }
