@@ -1,6 +1,7 @@
 "use client";
 
-import { Download, FileX } from "lucide-react";
+import { useState } from "react";
+import { Download, FileX, Eye, EyeOff, ExternalLink } from "lucide-react";
 import {
   Drawer,
   DrawerClose,
@@ -40,6 +41,7 @@ export function EvidenciaDetalle({
   const { data, isLoading } = useEvidencia(open ? id : null);
   // Usamos el detalle completo si llegó, o el preview de la lista.
   const e = data ?? evidenciaPreview;
+  const [verPdf, setVerPdf] = useState(true);
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
@@ -104,6 +106,56 @@ export function EvidenciaDetalle({
                 </section>
 
                 <ResumenVotosBloque evidencia={e} />
+
+                {e.pdf_url && (
+                  <section className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-sm font-semibold">Imagen del E-14</h3>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setVerPdf((v) => !v)}
+                      >
+                        {verPdf ? (
+                          <>
+                            <EyeOff className="size-4" /> Ocultar
+                          </>
+                        ) : (
+                          <>
+                            <Eye className="size-4" /> Ver
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                    {verPdf && (
+                      <object
+                        data={e.pdf_url}
+                        type="application/pdf"
+                        className="h-[60vh] w-full rounded-lg border bg-muted"
+                      >
+                        <div className="flex flex-col items-center gap-2 p-6 text-center text-sm text-muted-foreground">
+                          <p>
+                            Tu navegador no puede mostrar el PDF aquí.
+                          </p>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            render={
+                              <a
+                                href={e.pdf_url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                              />
+                            }
+                          >
+                            <ExternalLink className="size-4" /> Abrir en una
+                            pestaña
+                          </Button>
+                        </div>
+                      </object>
+                    )}
+                  </section>
+                )}
 
                 {isLoading && (
                   <p className="text-center text-xs text-muted-foreground">
