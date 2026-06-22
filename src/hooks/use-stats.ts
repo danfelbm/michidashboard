@@ -6,9 +6,10 @@ import type { FiltrosEvidencias } from "@/types/evidencia";
 export interface StatsRespuesta {
   total_disponible: number;
   evidencias_contadas: number;
+  mesas: number;
   parcial: boolean;
   max_paginas: number;
-  candidatos: { alias: string; titulo: string; votos: number }[];
+  candidatos: { titulo: string; votos: number }[];
   blancos: number;
   nulos: number;
   no_marcados: number;

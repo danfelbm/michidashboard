@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "harvest:geo": "tsx scripts/harvest-geo.ts"
+    "harvest:geo": "tsx scripts/harvest-geo.ts",
+    "aggregate": "tsx scripts/aggregate-conteo.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.6.0",

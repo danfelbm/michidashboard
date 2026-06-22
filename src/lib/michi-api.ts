@@ -7,7 +7,7 @@ const BASE =
   "https://michi.movimientopactohistorico.co/api/v1";
 const TOKEN = process.env.MICHI_API_TOKEN;
 
-export const PER_PAGE_MAX = 100;
+export const PER_PAGE_MAX = 1000;
 
 export class MichiApiError extends Error {
   constructor(

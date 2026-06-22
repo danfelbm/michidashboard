@@ -1,0 +1,48 @@
+name: Conteo nacional
+
+# Recalcula el conteo nacional deduplicado y commitea el JSON.
+# Requiere el secret MICHI_API_TOKEN en el repositorio
+# (Settings → Secrets and variables → Actions).
+
+on:
+  schedule:
+    - cron: "*/15 * * * *" # cada ~15 minutos
+  workflow_dispatch: {} # permite ejecutarlo manualmente
+
+# Evita ejecuciones solapadas.
+concurrency:
+  group: conteo-nacional
+  cancel-in-progress: false
+
+jobs:
+  aggregate:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      - name: Calcular conteo nacional
+        env:
+          MICHI_API_TOKEN: ${{ secrets.MICHI_API_TOKEN }}
+          MICHI_API_BASE: https://michi.movimientopactohistorico.co/api/v1
+        run: npm run aggregate
+
+      - name: Commit si cambió
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          if ! git diff --quiet src/data/conteo-nacional.json; then
+            git add src/data/conteo-nacional.json
+            git commit -m "chore: refrescar conteo nacional [skip ci]"
+            git push
+          else
+            echo "Sin cambios en el conteo."
+          fi

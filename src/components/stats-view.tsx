@@ -131,15 +131,15 @@ export function StatsView() {
               <Card>
                 <CardHeader className="pb-2">
                   <CardTitle className="text-sm font-medium text-muted-foreground">
-                    Evidencias contadas
+                    Mesas (deduplicadas)
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p className="text-3xl font-bold tabular-nums">
-                    {fmtNum(data.evidencias_contadas)}
+                    {fmtNum(data.mesas)}
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    de {fmtNum(data.total_disponible)} disponibles
+                    de {fmtNum(data.evidencias_contadas)} evidencias contadas
                   </p>
                 </CardContent>
               </Card>
@@ -171,7 +171,7 @@ export function StatsView() {
                     0,
                   );
                   return (
-                    <div key={c.alias} className="space-y-1">
+                    <div key={c.titulo} className="space-y-1">
                       <div className="flex items-center justify-between text-sm">
                         <span className="font-medium">{c.titulo}</span>
                         <span className="tabular-nums">

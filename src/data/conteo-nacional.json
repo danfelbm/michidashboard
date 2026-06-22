@@ -1,0 +1,18 @@
+{
+  "generado_at": "2026-06-22T02:13:52.428Z",
+  "total_evidencias": 121058,
+  "mesas": 64503,
+  "cepeda": 6203461,
+  "abelardo": 6444388,
+  "otros": [
+    {
+      "titulo": "Votos por Paloma Valencia",
+      "votos": 239678
+    }
+  ],
+  "blancos": 230728,
+  "nulos": 130165,
+  "no_marcados": 96123,
+  "sufragantes": 13514869,
+  "total_urna": 13375947
+}

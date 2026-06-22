@@ -77,12 +77,33 @@ El token nunca llega al cliente.
 > La API limita `per_page` a **100** y no expone catálogo geográfico, por eso
 > los departamentos/municipios se obtienen con `npm run harvest:geo`.
 
-### Estadísticas
+### Estadísticas y conteo nacional
 
-El panel ([/estadisticas](src/app/estadisticas/page.tsx)) suma votos por
-candidato sobre el universo filtrado. Para evitar timeouts, recorre hasta
-**60 páginas** (6.000 evidencias) por consulta y marca el resultado como
-*parcial* cuando hay más. **Filtra por municipio** para conteos completos.
+El panel ([/estadisticas](src/app/estadisticas/page.tsx)) tiene dos partes:
+
+**1. Conteo Nacional (deduplicado por mesa).** La API no expone agregación, así
+que sumar evidencias crudas sobrecuenta (~1,9 evidencias por mesa: los testigos
+reenvían la misma mesa varias veces). El conteo correcto **deduplica por mesa**:
+una evidencia por mesa, prefiriendo `aprobada` sobre `pendiente`, y a igual
+jerarquía la más reciente; se descartan las `rechazada`.
+
+Como recorrer las ~120 páginas (`per_page=1000`) tarda **~3 min**, no cabe en un
+request de Vercel. Por eso el cálculo vive en un script:
+
+```bash
+npm run aggregate   # recorre todo, dedup por mesa → src/data/conteo-nacional.json
+```
+
+El dashboard lee ese JSON (vía GitHub raw, para refrescar sin redeploy). Para
+mantenerlo fresco automáticamente hay un **GitHub Action**
+([.github/workflows/aggregate.yml](.github/workflows/aggregate.yml)) que lo
+ejecuta cada ~15 min. Para activarlo, añade el secret **`MICHI_API_TOKEN`** en
+*Settings → Secrets and variables → Actions* del repo.
+
+**2. Conteo por ámbito filtrado.** Suma de votos (también dedup por mesa) sobre
+el universo que filtres (departamento/municipio/zona…). Recorre hasta 15 páginas
+y marca el resultado como *parcial* si hay más; **filtra por municipio** para
+conteos acotados y completos.
 
 ### Estado en la URL
 
